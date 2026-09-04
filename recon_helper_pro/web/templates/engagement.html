@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ engagement.name }}{% endblock %}
+{% block content %}
+<h1>{{ engagement.name }}</h1>
+{% if engagement.description %}<p class="muted">{{ engagement.description }}</p>{% endif %}
+<p><a class="button" href="/engagements/{{ engagement.id }}/run">Run recon</a>
+   <a class="button" href="/engagements/{{ engagement.id }}/reports">Reports</a></p>
+
+<section class="card">
+  <h2>Scope</h2>
+  <p class="muted small">A bare hostname authorizes that host only. Subdomains need
+    <code>*.example.com</code>; addresses and ranges must be added deliberately.
+    Regardless of what is listed here, the link-local range
+    (<code>169.254.0.0/16</code>, <code>fe80::/10</code>) and cloud metadata endpoints
+    can never be contacted.</p>
+  {% if scope_entries %}
+  <table>
+    <thead><tr><th>Type</th><th>Entry</th><th></th></tr></thead>
+    <tbody>
+    {% for entry in scope_entries %}
+      <tr>
+        <td>{{ entry.type.value }}</td>
+        <td class="mono">{{ entry.display() }}</td>
+        <td>
+          <form method="post"
+                action="/engagements/{{ engagement.id }}/scope/{{ entry.id }}/delete?csrf={{ csrf_token }}">
+            <button type="submit" class="link danger">remove</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="alert warn">No scope declared. Every module that contacts a target will
+      refuse to run until you either add scope or confirm an override.</p>
+  {% endif %}
+  <form method="post" action="/engagements/{{ engagement.id }}/scope?csrf={{ csrf_token }}"
+        class="inline">
+    <input type="text" name="entry" required maxlength="200"
+           placeholder="example.com, *.example.com, 10.0.0.0/24, https://host:8443">
+    <button type="submit" class="primary">Add to scope</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Findings <span class="muted small">({{ finding_count }} interpretations, not confirmed
+    vulnerabilities)</span></h2>
+  {% if findings_by_category %}
+    {% for category, findings in findings_by_category.items() %}
+      <h3 class="category">{{ category }}</h3>
+      <table>
+        <thead><tr><th>Severity hint</th><th>Confidence</th><th>Title</th><th>Asset</th></tr></thead>
+        <tbody>
+        {% for finding in findings %}
+          <tr>
+            <td><span class="sev sev-{{ finding.severity_hint }}">{{ finding.severity_hint }}</span></td>
+            <td>{{ finding.confidence }}</td>
+            <td><a href="/engagements/{{ engagement.id }}/findings/{{ finding.id }}">{{ finding.title }}</a></td>
+            <td class="mono small">{{ finding.asset_value or "-" }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  {% else %}
+    <p class="muted">Nothing interpreted yet.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Assets</h2>
+  <p class="muted small">Discovered assets are recorded only. Nothing here was contacted
+    because it was found - adding one to scope is always your decision.</p>
+  {% if assets %}
+  <table>
+    <thead><tr><th>Kind</th><th>Value</th><th>In scope</th><th>Found by</th><th>First seen</th></tr></thead>
+    <tbody>
+    {% for asset in assets %}
+      <tr>
+        <td>{{ asset.kind.value }}</td>
+        <td class="mono">{{ asset.value }}</td>
+        <td>{% if asset.in_scope %}<span class="pill ok">yes</span>{% else %}<span class="pill muted">no</span>{% endif %}</td>
+        <td>{{ asset.discovered_by }}</td>
+        <td class="mono small">{{ asset.first_seen }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No assets recorded yet.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>Runs</h2>
+  {% if runs %}
+  <table>
+    <thead><tr><th>#</th><th>Module</th><th>Mode</th><th>Target</th><th>Status</th>
+      <th>Requests</th><th>Started</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for run in runs %}
+      <tr>
+        <td>{{ run.id }}</td>
+        <td class="mono">{{ run.module }}</td>
+        <td>{{ run.mode.value }}</td>
+        <td class="mono small">{{ run.target }}</td>
+        <td><span class="status status-{{ run.status.value }}">{{ run.status.value }}</span></td>
+        <td>{{ run.request_count }}</td>
+        <td class="mono small">{{ run.started_at }}</td>
+        <td class="small">{{ run.error_summary | shorten(80) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">Nothing has been run yet.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>Activity log</h2>
+  <p class="muted small">Every run, every request count, and every out-of-scope override.</p>
+  {% if activity %}
+  <table>
+    <thead><tr><th>When</th><th>Module</th><th>Mode</th><th>Target</th><th>Requests</th>
+      <th>Outcome</th><th>Override</th></tr></thead>
+    <tbody>
+    {% for event in activity %}
+      <tr{% if event.override_reason %} class="overridden"{% endif %}>
+        <td class="mono small">{{ event.timestamp }}</td>
+        <td class="mono">{{ event.module }}</td>
+        <td>{{ event.mode }}</td>
+        <td class="mono small">{{ event.target }}</td>
+        <td>{{ event.request_count }}</td>
+        <td>{{ event.outcome }}</td>
+        <td class="small">{{ event.override_reason or "-" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">Nothing logged yet.</p>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+
+<form method="post" action="/engagements/{{ engagement.id }}/reports?csrf={{ csrf_token }}">
+  <button type="submit" class="primary">Generate a report now</button>
+</form>
+
+<section class="card">
+  <h2>Exported reports</h2>
+  {% if reports %}
+  <ul class="files">
+    {% for name in reports %}
+      <li>
+        <a href="/engagements/{{ engagement.id }}/reports?preview={{ name }}">{{ name }}</a>
+        <a class="button small" href="/reports/{{ name }}/download">download</a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="muted">Nothing exported yet.</p>
+  {% endif %}
+</section>
+
+{% if preview_name %}
+<section class="card">
+  <h2>Preview: {{ preview_name }}</h2>
+  <p class="muted small">Shown as plain text. A report contains hostnames, headers and page
+    titles that the target controls, so it is never rendered as markup here.</p>
+  <pre class="report">{{ preview_body }}</pre>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Run recon{% endblock %}
+{% block content %}
+<h1>Run recon</h1>
+
+{% if not scope_entries %}
+  <div class="alert warn">This engagement has no scope. Anything that contacts a target
+    will need an explicit override, which is recorded in the activity log and printed in
+    the report. <a href="/engagements/{{ engagement.id }}">Add scope first</a>.</div>
+{% endif %}
+
+<section class="card" id="runner"
+         data-engagement="{{ engagement.id }}"
+         data-active-job="{{ active_job }}">
+  <div class="stack">
+    <label>Target
+      <input type="text" id="target" value="{{ target }}" maxlength="253"
+             placeholder="example.com" autocomplete="off">
+    </label>
+
+    <fieldset>
+      <legend>What to run</legend>
+      <label class="check"><input type="radio" name="mode" value="recipe" checked>
+        The guided recipe - {{ recipe | length }} steps, in order</label>
+      <label class="check"><input type="radio" name="mode" value="single">
+        A single module</label>
+    </fieldset>
+
+    <label id="module-picker" hidden>Module
+      <select id="module">
+        {% for item in modules %}
+          <option value="{{ item.module.id }}" data-mode="{{ item.module.mode.value }}">
+            {{ item.module.name }} ({{ item.module.mode.value }})
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div id="scope-notice" class="alert" hidden></div>
+
+    <label class="check" id="override-wrap" hidden>
+      <input type="checkbox" id="override">
+      I am authorized to contact this out-of-scope destination. Record the override.
+    </label>
+
+    <div class="actions">
+      <button id="start" class="primary">Start</button>
+      <button id="cancel" class="danger" hidden>Cancel</button>
+    </div>
+  </div>
+</section>
+
+<section class="card" id="progress" hidden>
+  <h2>Progress</h2>
+  <p id="job-status" class="muted"></p>
+  <table id="results">
+    <thead><tr><th>Module</th><th>Mode</th><th>Status</th><th>Obs.</th><th>Findings</th>
+      <th>Assets</th><th>Requests</th><th>Note</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <h3>Log</h3>
+  <ul id="log" class="log"></ul>
+  <p id="done-links" hidden>
+    <a class="button" href="/engagements/{{ engagement.id }}">See what was recorded</a>
+    <a class="button" href="/engagements/{{ engagement.id }}/reports">Generate a report</a>
+  </p>
+</section>
+
+<section class="card">
+  <h2>What each step does</h2>
+  <p class="muted small">Contact mode says how much a module touches the target:
+    <strong>third-party</strong> never contacts it, <strong>direct-read</strong> sends a
+    few read-only requests, <strong>enumerative</strong> sends several.</p>
+  {% for item in modules %}
+    <details class="lesson">
+      <summary>
+        <span class="mono">{{ item.module.id }}</span>
+        <span class="mode mode-{{ item.module.mode.value }}">{{ item.module.mode.value }}</span>
+        {{ item.module.name }}
+      </summary>
+      {% if item.lesson.before %}
+        <div class="prose">{{ item.lesson.before | teaching }}</div>
+      {% endif %}
+      {% if item.lesson.after %}
+        <h4>How to read the result</h4>
+        <div class="prose">{{ item.lesson.after | teaching }}</div>
+      {% endif %}
+      {% if item.lesson.next_steps %}
+        <h4>Suggested next steps</h4>
+        <ul>{% for step in item.lesson.next_steps %}<li>{{ step }}</li>{% endfor %}</ul>
+      {% endif %}
+    </details>
+  {% endfor %}
+</section>
+{% endblock %}

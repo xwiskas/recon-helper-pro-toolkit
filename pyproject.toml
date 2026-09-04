@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recon-helper-pro"
+version = "0.1.0"
+description = "Recon Helper Pro - a learner-first reconnaissance companion for authorized targets."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Recon Helper Pro" }]
+keywords = ["recon", "osint", "security", "education"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Information Technology",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Security",
+]
+dependencies = [
+  "typer>=0.12",
+  "rich>=13.7",
+  "httpx>=0.27",
+  "dnspython>=2.6",
+  "cryptography>=42",
+  "idna>=3.6",
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "jinja2>=3.1",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "respx>=0.21",
+  "httpx>=0.27",
+]
+
+[project.scripts]
+rhp = "recon_helper_pro.cli.main:app"
+
+[tool.setuptools.packages.find]
+include = ["recon_helper_pro*"]
+
+[tool.setuptools.package-data]
+recon_helper_pro = [
+  "teaching_content/*.md",
+  "web/templates/*.html",
+  "web/static/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ finding.title }}{% endblock %}
+{% block content %}
+<p class="muted small"><a href="/engagements/{{ engagement.id }}">&larr; {{ engagement.name }}</a></p>
+<h1>{{ finding.title }}</h1>
+
+<div class="alert info">This is an <strong>interpretation</strong> of the observations
+  listed below, not a confirmed vulnerability. Verify it yourself before reporting it
+  to anyone.</div>
+
+<dl class="meta">
+  <dt>Category</dt><dd>{{ finding.category }}</dd>
+  <dt>Asset</dt><dd class="mono">{{ finding.asset_value or "-" }}</dd>
+  <dt>Severity hint</dt>
+  <dd><span class="sev sev-{{ finding.severity_hint }}">{{ finding.severity_hint }}</span>
+    <span class="muted small">context-aware suggestion, not a score</span></dd>
+  <dt>Confidence</dt><dd>{{ finding.confidence }}</dd>
+  <dt>Recorded</dt><dd class="mono small">{{ finding.created_at }}</dd>
+  {% if run %}
+    <dt>Produced by</dt>
+    <dd class="mono small">{{ run.module }} {{ run.module_version }} ({{ run.mode.value }})</dd>
+  {% endif %}
+</dl>
+
+<section class="card">
+  <h2>Interpretation</h2>
+  <p>{{ finding.interpretation_text }}</p>
+</section>
+
+<section class="card">
+  <h2>Limitations</h2>
+  <p>{{ finding.limitations or "None stated." }}</p>
+</section>
+
+<section class="card">
+  <h2>Supporting observations</h2>
+  {% if supporting %}
+  <table>
+    <thead><tr><th>Type</th><th>Value</th><th>Source</th><th>Collected</th><th>Confidence</th></tr></thead>
+    <tbody>
+    {% for observation in supporting %}
+      <tr>
+        <td class="mono small">{{ observation.type }}</td>
+        <td class="mono">{{ observation.normalized_value }}</td>
+        <td class="small">{{ observation.source_provider }}</td>
+        <td class="mono small">{{ observation.collected_at }}</td>
+        <td>{{ observation.confidence }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">No stored observation matched the keys recorded with this finding.</p>
+  {% endif %}
+</section>
+
+{% if lesson and lesson.after %}
+<section class="card">
+  <h2>How to read this</h2>
+  <div class="prose">{{ lesson.after | teaching }}</div>
+</section>
+{% endif %}
+{% endblock %}

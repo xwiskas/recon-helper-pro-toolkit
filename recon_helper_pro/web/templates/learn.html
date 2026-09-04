@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Learn{% endblock %}
+{% block content %}
+<h1>Learn</h1>
+
+<section class="card">
+  <h2>Modules</h2>
+  {% for module, lesson in lessons %}
+    <details class="lesson">
+      <summary>
+        <span class="mono">{{ module.id }}</span>
+        <span class="mode mode-{{ module.mode.value }}">{{ module.mode.value }}</span>
+        {{ module.name }}
+      </summary>
+      {% if lesson.before %}<div class="prose">{{ lesson.before | teaching }}</div>{% endif %}
+      {% if lesson.after %}
+        <h4>How to read the result</h4>
+        <div class="prose">{{ lesson.after | teaching }}</div>
+      {% endif %}
+      {% if lesson.next_steps %}
+        <h4>Suggested next steps</h4>
+        <ul>{% for step in lesson.next_steps %}<li>{{ step }}</li>{% endfor %}</ul>
+      {% endif %}
+    </details>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Glossary</h2>
+  <dl class="glossary">
+    {% for term, body in glossary %}
+      <dt>{{ term }}</dt>
+      <dd>{{ body | teaching }}</dd>
+    {% endfor %}
+  </dl>
+</section>
+{% endblock %}

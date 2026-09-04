@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ app_name }}{% endblock %} - {{ app_name }}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">{{ app_name }} <span class="version">{{ version }}</span></a>
+  <nav>
+    {% if current_engagement %}
+      <a href="/engagements/{{ current_engagement.id }}">Overview</a>
+      <a href="/engagements/{{ current_engagement.id }}/run">Run recon</a>
+      <a href="/engagements/{{ current_engagement.id }}/reports">Reports</a>
+    {% endif %}
+    <a href="/learn">Learn</a>
+  </nav>
+  <div class="context">
+    {% if current_engagement %}
+      <span class="pill">engagement: {{ current_engagement.name }}</span>
+    {% else %}
+      <span class="pill muted">no engagement selected</span>
+    {% endif %}
+    {% if busy %}<span class="pill running">a run is in progress</span>{% endif %}
+  </div>
+</header>
+
+<main>
+  {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <p><strong>Read-only reconnaissance.</strong> Only point this at systems you own or have
+  written permission to test. Findings shown here are interpretations with confidence
+  levels, not confirmed vulnerabilities.</p>
+  <p class="muted">Serving on the loopback interface only. This session's link contains a
+  token that is regenerated every launch.</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

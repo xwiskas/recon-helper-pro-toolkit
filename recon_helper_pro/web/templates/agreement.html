@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Authorization{% endblock %}
+{% block content %}
+<h1>Authorization and ethics agreement</h1>
+{% if authorized %}
+  <div class="alert ok">You have already accepted version {{ agreement_version }}.
+    <a href="/">Go to your engagements</a>.</div>
+{% else %}
+  <p>Read this before anything else. Nothing can be run until it is accepted.</p>
+{% endif %}
+<pre class="agreement">{{ agreement_text }}</pre>
+{% if not authorized %}
+<form method="post" action="/agreement?csrf={{ csrf_token }}">
+  <label class="check">
+    <input type="checkbox" name="confirmed" required>
+    I have read the above and I am authorized to test the systems I will point this at.
+  </label>
+  <button type="submit" class="primary">Accept version {{ agreement_version }}</button>
+</form>
+{% endif %}
+{% endblock %}
