@@ -42,6 +42,65 @@ pytest
 The tests use recorded/mocked responses only - they pass with no network access
 and no optional tools installed.
 
+## Quick Start
+
+A 60-second run, from nothing to your first report. This is the shortest path
+for someone completely new to the tool.
+
+**1. What it is**
+
+Recon Helper Pro is a guided, learner-first domain-reconnaissance companion.
+It walks you through a safe, structured recon workflow against a target you
+are authorized to test, explains each step, records evidence, and exports a
+Markdown report. Two faces drive the same engine: a command line (`rhp`) and
+a local web dashboard (`rhp web`).
+
+**2. How it works**
+
+`rhp recon` runs a fixed, ordered recipe — registration → DNS → reverse DNS →
+certificate transparency → TLS certificate → HTTP headers → technology
+fingerprint → published files → hints → report. Underneath, one core engine
+(`core.engine`) enforces scope, budgets, redaction and logging for both the
+CLI and the dashboard, so behaviour never drifts between them.
+
+**3. Install**
+
+```bash
+# Python 3.10+ required. Nothing else.
+python -m venv .venv
+# Windows:  .venv\Scripts\activate
+# macOS/Linux:  source .venv/bin/activate
+pip install -e .
+```
+
+That gives you the `rhp` command. (Or run `python -m recon_helper_pro.cli.main …`
+if you prefer not to install.)
+
+**4. First run, step by step**
+
+```bash
+rhp init                                  # read and accept the authorization agreement
+rhp engagement new "My first engagement"  # create a workspace
+rhp scope add example.com                 # DECLARE what you are authorized to test
+rhp recon example.com                     # run the guided walkthrough
+```
+
+**5. What you get**
+
+A structured evidence store (SQLite) and a Markdown report in
+`<data dir>/exports/`. The report separates raw **observations** from
+**interpreted findings** — nothing is ever auto-marked a confirmed
+vulnerability.
+
+**6. Try the dashboard too**
+
+```bash
+rhp web                 # opens the local web UI; follow the printed URL
+```
+
+> ⚠️ Only point Recon Helper Pro at systems you own or have written permission
+> to test. Unauthorized access is illegal in most jurisdictions.
+
 ## The golden path
 
 ```bash
